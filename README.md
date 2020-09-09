@@ -16,3 +16,7 @@ All PRs will have an associated container created and saved to GHCR. However thi
 ## Nightly
 
 Nightly container builds will be tagged `nightly`
+
+## Tags
+
+All git tags with the format `'v*.*.*'` will be published and will update the `latest` tag to point to the most current tag release. (Note this does not take into account semantic release versioning, only the latest tag will be considered `latest`)
