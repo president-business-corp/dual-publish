@@ -26,20 +26,24 @@ jobs:
           ## Release publish to Docker Hub
           GHCR_IMAGE=ghcr.io/${{ github.repository_owner }}/dual-publish
           DOCKER_IMAGE=docker.io/${{ secrets.DOCKER_USERNAME }}/dual-publish
+
           VERSION=edge
+
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           fi
+
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
           fi
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # only publish PRs to GHCR
             PR_NUMBER=$(echo ${{ github.ref }} | sed -r 's/^refs\/pull\/([0-9]+)\/merge/\1/')
             VERSION=pr-$PR_NUMBER
-            TAGS="${GHCR_IMAGE}:${VERSION}"
+            TAGS="${GHCR_IMAGE}:${VERSION},${GHCR_IMAGE}:${GITHUB_SHA}"
           else
-            TAGS="${GHCR_IMAGE}:${VERSION},${DOCKER_IMAGE}:${VERSION}"
+            TAGS="${GHCR_IMAGE}:${VERSION},${GHCR_IMAGE}:${GITHUB_SHA},${DOCKER_IMAGE}:${VERSION}"
             if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
               TAGS="$TAGS,${GHCR_IMAGE}:latest,${DOCKER_IMAGE}:latest"
             fi
