@@ -8,3 +8,7 @@ This workflow requires you to store the following secrets.
 - `DOCKER_USERNAME` Docker Hub username
 - `DOCKER_PASSWORD` Docker Hub password
 - `GHCR_PAT` GitHub PAT w/ `write:packages` and `read:packages` scopes only **NOTE** remove the `repo` scope.
+
+## Pull Requests
+
+All PRs will have an associated container created and saved to GHCR. However this container will not be published to Docker Hub.
