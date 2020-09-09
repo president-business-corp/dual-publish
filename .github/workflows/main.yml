@@ -55,7 +55,10 @@ jobs:
           LABELS="$LABELS,org.opencontainers.image.version=$VERSION"
           LABELS="$LABELS,com.github.repo.branch=$BRANCH"
           LABELS="$LABELS,com.github.repo.dockerfile=Dockerfile"
-          --label "com.github.repo.pr=$PR"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER=$(echo ${{ github.ref }} | sed -r 's/^refs\/pull\/([0-9]+)\/merge/\1/')
+            LABELS="$LABELS,com.github.repo.pr=$PR_NUMBER"
+          fi
           echo ::set-output name=labels::${LABELS}
 
           BUILD_ARGS="BRANCH=$BRANCH"
