@@ -12,3 +12,7 @@ This workflow requires you to store the following secrets.
 ## Pull Requests
 
 All PRs will have an associated container created and saved to GHCR. However this container will not be published to Docker Hub.
+
+## Nightly
+
+Nightly container builds will be tagged `nightly`
