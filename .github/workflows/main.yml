@@ -25,7 +25,7 @@ jobs:
           ## Always publish to GHCR
           ## Release publish to Docker Hub
           GHCR_IMAGE=ghcr.io/${{ github.repository_owner }}/dual-publish
-          DOCKER_IMAGE=docker.io/$${ secrets.DOCKER_USERNAME }}/dual-publish
+          DOCKER_IMAGE=docker.io/${{ secrets.DOCKER_USERNAME }}/dual-publish
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
