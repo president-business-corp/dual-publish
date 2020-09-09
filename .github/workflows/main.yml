@@ -24,7 +24,8 @@ jobs:
           # Need to revise this... 
           ## Always publish to GHCR
           ## Release publish to Docker Hub
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/test/multi-arch
+          GHCR_IMAGE=ghcr.io/${{ github.repository_owner }}/dual-publish
+          DOCKER_IMAGE=docker.io/$${ secrets.DOCKER_USERNAME }}/dual-publish
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
@@ -32,10 +33,18 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
           fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # only publish PRs to GHCR
+            PR=$(echo ${{ github.ref }} | sed -r 's/^refs\/pull\/([0-9]+)\/merge/\1/')
+            VERSION=$PR
+            TAGS="${GHCR_IMAGE}:${VERSION}"
+          else
+            TAGS="${GHCR_IMAGE}:${VERSION},${DOCKER_IMAGE}:${VERSION}"
+            if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+              TAGS="$TAGS,${GHCR_IMAGE}:latest,${DOCKER_IMAGE}:latest"
+            fi
           fi
+
           echo ::set-output name=tags::${TAGS}
 
           # lowercase the branch name
@@ -64,26 +73,26 @@ jobs:
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
 
-      - name: Login to GHCR
-        uses: docker/login-action@v1 
-        with:
-          registry: ghcr.io
-          password: ${{ secrets.GHCR_PAT }}
+#       - name: Login to GHCR
+#         uses: docker/login-action@v1 
+#         with:
+#           registry: ghcr.io
+#           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1 
-        with:
-          username: $${ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v1 
+#         with:
+#           username: $${ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.prep.outputs.tags }}
-          build-args: ${{ steps.prep.outputs.args }}
-          labels: ${{ steps.prep.outputs.labels }}
+#       - name: Build and push
+#         id: docker_build
+#         uses: docker/build-push-action@v2
+#         with:
+#           builder: ${{ steps.buildx.outputs.name }}
+#           context: .
+#           file: ./Dockerfile
+#           push: true
+#           tags: ${{ steps.prep.outputs.tags }}
+#           build-args: ${{ steps.prep.outputs.args }}
+#           labels: ${{ steps.prep.outputs.labels }}
